@@ -1,6 +1,7 @@
 const cardContainer = document.querySelector('[data-js="card-container"]');
 
 export function CharacterCard(image, characterName, status, type, occurences) {
+  cardContainer.innerHTML = "";
   const listElement = document.createElement("li");
   listElement.classList.add("card");
   listElement.innerHTML = `<div class="card__image-container">
@@ -12,7 +13,7 @@ export function CharacterCard(image, characterName, status, type, occurences) {
   <div class="card__image-gradient"></div>
 </div>
 <div class="card__content">
-  <h2 class="card__title">Rick Sanchez</h2>
+  <h2 class="card__title">${characterName}</h2>
   <dl class="card__info">
     <dt class="card__info-title">Status</dt>
     <dd class="card__info-description">${status}</dd>
