@@ -48,7 +48,6 @@ export async function fetchCharacterData() {
 
     CharacterCard(image, characterName, status, type, occurences);
   });
-  return data;
 }
 
 // Event listeners for navigation
