@@ -1,10 +1,27 @@
 import { CharacterCard } from "./components/CharacterCard/CharacterCard.js";
 
-async function fetchCharacterData(page) {
-  cardContainer.textContent = "";
-  let query = "";
+const searchBarContainer = document.querySelector(
+  '[data-js="search-bar-container"]'
+);
+const searchBar = document.querySelector('[data-js="search-bar"]');
+const navigation = document.querySelector('[data-js="navigation"]');
+const prevButton = document.querySelector('[data-js="button-prev"]');
+const nextButton = document.querySelector('[data-js="button-next"]');
+const pagination = document.querySelector('[data-js="pagination"]');
+const cardContainer = document.querySelector('[data-js="card-container"]');
 
-  // nav oder suche
+// States
+let page = 1;
+let maxPages = 1;
+let searchQuery = "";
+
+fetchCharacterData();
+
+// Function for fetch and render
+export async function fetchCharacterData() {
+  cardContainer.innerHTML = "";
+
+  let query = "";
 
   if (searchQuery.length > 0) {
     query = `?name=${searchQuery}`;
@@ -17,76 +34,46 @@ async function fetchCharacterData(page) {
     `https://rickandmortyapi.com/api/character${query}`
   );
   const data = await response.json();
+  const characters = data.results;
+  maxPages = data.info.pages;
 
-  if (data.results && data.results.length > 0) {
-    const characters = data.results;
-    maxPage = data.info.pages;
+  updatePagination(page, maxPages);
 
-    characters.forEach((character) => {
-      const image = character.image;
-      const characterName = character.name;
-      const status = character.status;
-      const type = character.type;
-      const occurences = character.episode.length;
+  characters.forEach((character) => {
+    const image = character.image;
+    const characterName = character.name;
+    const status = character.status;
+    const type = character.type;
+    const occurences = character.episode.length;
 
-      CharacterCard(image, characterName, status, type, occurences);
-    });
+    CharacterCard(image, characterName, status, type, occurences);
+  });
+}
 
-    updatePaginationDisplay(page, maxPage);
-  } else {
-    cardContainer.textContent =
-      "Sorry, we don't have any results for your search.";
+// Event listeners for navigation
+nextButton.addEventListener("click", () => {
+  if (page < maxPages) {
+    page++;
+    fetchCharacterData();
   }
+});
+
+prevButton.addEventListener("click", () => {
+  if (page > 1) {
+    page--;
+    fetchCharacterData();
+  }
+});
+
+// Function for Pagiantion
+function updatePagination(page, maxPages) {
+  pagination.textContent = `${page} / ${maxPages}`;
 }
 
-const cardContainer = document.querySelector('[data-js="card-container"]');
-const searchBarContainer = document.querySelector(
-  '[data-js="search-bar-container"]'
-);
-const searchBar = document.querySelector('[data-js="search-bar"]');
-const navigation = document.querySelector('[data-js="navigation"]');
-const prevButton = document.querySelector('[data-js="button-prev"]');
-const nextButton = document.querySelector('[data-js="button-next"]');
-const pagination = document.querySelector('[data-js="pagination"]');
+searchBar.addEventListener("submit", (event) => {
+  event.preventDefault();
+  searchQuery = searchBar.query.value;
 
-let maxPage = 1;
-let page = 1;
-let searchQuery = "";
-
-fetchCharacterData(page);
-NavButton();
-searchBarFuntion();
-
-// hier anfang navButton function
-
-function NavButton() {
-  nextButton.addEventListener("click", async () => {
-    if (page < maxPage) {
-      page++;
-      await fetchCharacterData(page);
-    }
-  });
-
-  prevButton.addEventListener("click", async () => {
-    if (page > 1) {
-      page--;
-      await fetchCharacterData(page);
-    }
-  });
-}
-
-//  hier anfang pagination function
-
-function updatePaginationDisplay(page, maxPage) {
-  pagination.textContent = `${page} / ${maxPage}`;
-}
-
-// hier anfang the search bar function
-
-function searchBarFuntion() {
-  searchBar.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    searchQuery = searchBar.querySelector(".search-bar__input").value;
-    await fetchCharacterData(page);
-  });
-}
+  console.log(searchQuery);
+  fetchCharacterData();
+});
